@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>EMS Expense Portal - Mobile App</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#1e293b">
+
+  <!-- Bootstrap 5 CSS & FontAwesome Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- QR Code library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --bg-dark: #0f172a;
+      --card-bg: #ffffff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --radius: 16px;
+    }
+
+    body {
+      background-color: #f1f5f9;
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      padding-bottom: 70px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app-header {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      color: white;
+      padding: 18px 20px 24px;
+      border-bottom-left-radius: 24px;
+      border-bottom-right-radius: 24px;
+      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.3);
+    }
+
+    .badge-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: rgba(16, 185, 129, 0.15);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .wifi-pill {
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(10px);
+      padding: 10px 14px;
+      border-radius: 12px;
+      margin-top: 14px;
+      font-size: 0.85rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-tabs-custom {
+      background: #e2e8f0;
+      padding: 4px;
+      border-radius: 14px;
+      display: flex;
+      margin: 18px 0;
+    }
+
+    .nav-tabs-custom button {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 10px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      transition: all 0.2s ease;
+    }
+
+    .nav-tabs-custom button.active {
+      background: white;
+      color: var(--primary);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-custom {
+      background: white;
+      border-radius: var(--radius);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 4px 15px -1px rgba(0, 0, 0, 0.05);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .upload-box {
+      border: 2px dashed #cbd5e1;
+      border-radius: var(--radius);
+      padding: 24px 16px;
+      text-align: center;
+      background: #f8fafc;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .upload-box:hover, .upload-box.dragover {
+      border-color: var(--primary);
+      background: #eef2ff;
+    }
+
+    .preset-chip {
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border: 1px solid #cbd5e1;
+      background: white;
+      color: #475569;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .preset-chip.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
+
+    .form-control, .form-select {
+      border-radius: 12px;
+      padding: 12px 14px;
+      border: 1.5px solid #cbd5e1;
+      font-size: 0.95rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+    }
+
+    .btn-submit {
+      background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+      color: white;
+      font-weight: 700;
+      padding: 14px;
+      border-radius: 14px;
+      border: none;
+      width: 100%;
+      font-size: 1.05rem;
+      box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.4);
+      transition: all 0.2s ease;
+    }
+
+    .btn-submit:active {
+      transform: scale(0.98);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .preview-container {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      max-height: 250px;
+      margin-top: 15px;
+      border: 1px solid var(--border-color);
+      display: none;
+    }
+
+    .preview-img {
+      width: 100%;
+      height: 250px;
+      object-fit: cover;
+    }
+
+    .badge-in-process {
+      background: #fef3c7;
+      color: #d97706;
+      border: 1px solid #fde68a;
+    }
+
+    .badge-paid {
+      background: #d1fae5;
+      color: #059669;
+      border: 1px solid #a7f3d0;
+    }
+
+    /* Modal */
+    .modal-content {
+      border-radius: 20px;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h5 class="mb-0 fw-bold"><i class="fa-solid fa-receipt me-2 text-warning"></i>EMS Expense Portal</h5>
+        <small class="text-white-50">Mobile Upload & Submission</small>
+      </div>
+      <div>
+        <span class="badge-status">
+          <span class="spinner-grow spinner-grow-sm" role="status" style="width: 8px; height: 8px;"></span>
+          Online
+        </span>
+      </div>
+    </div>
+
+    <!-- Access Links Banner -->
+    <div class="wifi-pill" id="accessPill">
+      <div class="text-truncate me-2" style="max-width: 75%;">
+        <span id="accessIcon"><i class="fa-solid fa-globe text-warning me-1"></i></span>
+        <span class="text-white-50 small" id="accessTypeLabel">Direct Link:</span>
+        <strong id="activeUrlDisplay" class="text-white ms-1">{{ public_url if public_url else 'http://' ~ local_ip ~ ':' ~ port }}</strong>
+      </div>
+      <div class="d-flex gap-1">
+        <button class="btn btn-sm btn-light text-dark fw-bold rounded-pill px-2 py-1" onclick="copyCurrentUrl()" title="Copy Link">
+          <i class="fa-solid fa-copy"></i>
+        </button>
+        <button class="btn btn-sm btn-warning text-dark fw-bold rounded-pill px-3 py-1" onclick="showQrModal()">
+          <i class="fa-solid fa-qrcode me-1"></i> QR
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container" style="max-width: 600px;">
+    <!-- Navigation Tabs -->
+    <div class="nav-tabs-custom">
+      <button class="active" id="tabUploadBtn" onclick="switchTab('upload')">
+        <i class="fa-solid fa-cloud-arrow-up me-1"></i> New Expense
+      </button>
+      <button id="tabHistoryBtn" onclick="switchTab('history')">
+        <i class="fa-solid fa-list-check me-1"></i> Portal History
+      </button>
+    </div>
+
+    <!-- TAB 1: UPLOAD & SUBMIT -->
+    <div id="tabUpload">
+      <div class="card-custom">
+        <!-- Upload Card -->
+        <label class="form-label fw-bold mb-2">1. Upload Bill / Receipt</label>
+        
+        <div class="upload-box" id="uploadBox" onclick="document.getElementById('fileInput').click()">
+          <i class="fa-solid fa-camera fa-2x text-primary mb-2"></i>
+          <h6 class="fw-bold mb-1">Take Photo or Choose File</h6>
+          <small class="text-muted">Supports JPG, PNG, or PDF</small>
+        </div>
+
+        <input type="file" id="fileInput" accept="image/*,application/pdf" capture="environment" style="display: none;" onchange="handleFileSelect(this)">
+
+        <div class="d-flex gap-2 mt-2">
+          <button type="button" class="btn btn-sm btn-outline-primary flex-fill rounded-pill py-2" onclick="triggerCamera()">
+            <i class="fa-solid fa-camera me-1"></i> Snap Photo
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-secondary flex-fill rounded-pill py-2" onclick="document.getElementById('fileInput').removeAttribute('capture'); document.getElementById('fileInput').click()">
+            <i class="fa-solid fa-folder-open me-1"></i> Browse Files
+          </button>
+        </div>
+
+        <!-- Image Preview Container -->
+        <div class="preview-container" id="previewContainer">
+          <img id="previewImg" class="preview-img" src="" alt="Receipt Preview">
+          <div style="position: absolute; bottom: 8px; left: 8px; right: 8px; display: flex; justify-content: space-between;">
+            <span class="badge bg-dark bg-opacity-75" id="previewFileName">receipt.jpg</span>
+            <button class="btn btn-sm btn-danger py-0 px-2 rounded-pill" onclick="clearUploadedFile(event)">Remove</button>
+          </div>
+        </div>
+
+        <!-- Quick Category Presets -->
+        <div class="mt-4">
+          <label class="form-label fw-bold mb-2">2. Quick Category</label>
+          <div class="d-flex gap-2 overflow-auto pb-2" style="scrollbar-width: none;">
+            <span class="preset-chip active" onclick="applyPreset('rapido', this)">
+              <i class="fa-solid fa-car"></i> Rapido
+            </span>
+            <span class="preset-chip" onclick="applyPreset('uber', this)">
+              <i class="fa-solid fa-taxi"></i> Uber
+            </span>
+            <span class="preset-chip" onclick="applyPreset('lunch', this)">
+              <i class="fa-solid fa-utensils"></i> Lunch
+            </span>
+            <span class="preset-chip" onclick="applyPreset('dinner', this)">
+              <i class="fa-solid fa-bowl-food"></i> Dinner
+            </span>
+            <span class="preset-chip" onclick="applyPreset('hotel', this)">
+              <i class="fa-solid fa-hotel"></i> Hotel
+            </span>
+            <span class="preset-chip" onclick="applyPreset('other', this)">
+              <i class="fa-solid fa-receipt"></i> Other
+            </span>
+          </div>
+        </div>
+
+        <!-- Form Details -->
+        <div class="mt-3">
+          <label class="form-label fw-bold mb-2">3. Expense Details</label>
+          
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label class="form-label small text-muted mb-1">Expense Date</label>
+              <input type="date" id="inputDate" class="form-control" onchange="updateFormattedDate()">
+              <input type="hidden" id="inputPortalDate">
+            </div>
+            <div class="col-6">
+              <label class="form-label small text-muted mb-1">Amount (₹)</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light fw-bold">₹</span>
+                <input type="number" step="0.01" id="inputAmount" class="form-control fw-bold" placeholder="0.00" inputmode="decimal">
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small text-muted mb-1">Expense Type</label>
+            <select id="selectExpType" class="form-select">
+              {% for exp in expense_types %}
+              <option value="{{ exp.id }}">{{ exp.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small text-muted mb-1">Company</label>
+            <select id="selectCompany" class="form-select">
+              {% for c in companies %}
+              <option value="{{ c.id }}">{{ c.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <label class="form-label small text-muted mb-1">Remarks / Route Description</label>
+              <small class="text-muted"><span id="charCount">0</span>/245</small>
+            </div>
+            <textarea id="inputRemarks" class="form-control" rows="2" maxlength="245" placeholder="e.g. Pickup to Drop (Auto) or Lunch with client" oninput="updateCharCount()"></textarea>
+          </div>
+
+          <input type="hidden" id="uploadedFilename" value="">
+
+          <!-- Submit Button -->
+          <button id="btnSubmit" class="btn-submit mt-2" onclick="submitToPortal()">
+            <i class="fa-solid fa-paper-plane me-2"></i> Submit to EMS Portal
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: PORTAL HISTORY -->
+    <div id="tabHistory" style="display: none;">
+      <div class="card-custom">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div>
+            <h6 class="fw-bold mb-0">Live Portal Records</h6>
+            <small class="text-muted">Live from EMS portal database</small>
+          </div>
+          <button class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="loadPortalExpenses()">
+            <i class="fa-solid fa-arrows-rotate me-1"></i> Refresh
+          </button>
+        </div>
+
+        <div id="historyLoading" class="text-center py-4">
+          <div class="spinner-border text-primary" role="status"></div>
+          <p class="text-muted small mt-2">Fetching live expenses from portal...</p>
+        </div>
+
+        <div id="historyList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QR Code Modal -->
+  <div class="modal fade" id="qrModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content p-4 text-center">
+        <h5 class="fw-bold mb-1"><i class="fa-solid fa-qrcode text-primary me-2"></i>Open on Mobile Phone</h5>
+        <p class="text-muted small mb-3">Scan this QR code with your phone camera:</p>
+        
+        <!-- Toggle Public / Wi-Fi -->
+        <div class="btn-group w-100 mb-3" role="group">
+          <button type="button" class="btn btn-sm btn-outline-primary active" id="btnQrPublic" onclick="setQrMode('public')">
+            <i class="fa-solid fa-globe me-1"></i> Worldwide Link (HTTPS)
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-primary" id="btnQrWifi" onclick="setQrMode('wifi')">
+            <i class="fa-solid fa-wifi me-1"></i> Local Wi-Fi
+          </button>
+        </div>
+
+        <div class="d-flex justify-content-center my-2">
+          <div id="qrcodeCanvas" style="padding: 12px; background: white; border-radius: 12px; border: 1px solid #cbd5e1; display: inline-block;"></div>
+        </div>
+
+        <div class="bg-light p-2 rounded-3 small fw-bold mb-3 text-break" id="qrModalUrlText">
+          {{ public_url if public_url else 'http://' ~ local_ip ~ ':' ~ port }}
+        </div>
+
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-outline-primary flex-fill rounded-pill" onclick="copyModalUrl()">
+            <i class="fa-solid fa-copy me-1"></i> Copy Link
+          </button>
+          <button type="button" class="btn btn-secondary flex-fill rounded-pill" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status / Loading Toast Modal -->
+  <div class="modal fade" id="progressModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content p-4 text-center">
+        <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;"></div>
+        <h5 class="fw-bold mb-1" id="progressTitle">Submitting to Portal...</h5>
+        <p class="text-muted small mb-0" id="progressDesc">Authenticating and verifying session...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap Bundle JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    let CURRENT_PUBLIC_URL = "{{ public_url or '' }}";
+    const LOCAL_IP = "{{ local_ip }}";
+    const PORT = "{{ port }}";
+    const WIFI_URL = `http://${LOCAL_IP}:${PORT}`;
+    let ACTIVE_MODAL_URL = CURRENT_PUBLIC_URL || WIFI_URL;
+    let qrCodeObj = null;
+
+    function renderQr(url) {
+      const container = document.getElementById("qrcodeCanvas");
+      if (!container) return;
+      container.innerHTML = '';
+      qrCodeObj = new QRCode(container, {
+        text: url,
+        width: 190,
+        height: 190,
+        colorDark: "#0f172a",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+      const textEl = document.getElementById('qrModalUrlText');
+      if (textEl) textEl.innerText = url;
+    }
+
+    function setQrMode(mode) {
+      const btnPublic = document.getElementById('btnQrPublic');
+      const btnWifi = document.getElementById('btnQrWifi');
+      if (mode === 'public') {
+        if (btnPublic) btnPublic.classList.add('active');
+        if (btnWifi) btnWifi.classList.remove('active');
+        ACTIVE_MODAL_URL = CURRENT_PUBLIC_URL || WIFI_URL;
+      } else {
+        if (btnWifi) btnWifi.classList.add('active');
+        if (btnPublic) btnPublic.classList.remove('active');
+        ACTIVE_MODAL_URL = WIFI_URL;
+      }
+      renderQr(ACTIVE_MODAL_URL);
+    }
+
+    function showQrModal() {
+      const modalEl = document.getElementById('qrModal');
+      const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+      setQrMode(CURRENT_PUBLIC_URL ? 'public' : 'wifi');
+      modal.show();
+    }
+
+    function copyCurrentUrl() {
+      const url = CURRENT_PUBLIC_URL || WIFI_URL;
+      navigator.clipboard.writeText(url).then(() => {
+        alert("Copied link to clipboard:\n" + url);
+      }).catch(() => {
+        prompt("Copy this link:", url);
+      });
+    }
+
+    function copyModalUrl() {
+      navigator.clipboard.writeText(ACTIVE_MODAL_URL).then(() => {
+        alert("Copied link to clipboard:\n" + ACTIVE_MODAL_URL);
+      }).catch(() => {
+        prompt("Copy this link:", ACTIVE_MODAL_URL);
+      });
+    }
+
+    async function checkTunnelInfo() {
+      try {
+        const res = await fetch('/api/info');
+        const data = await res.json();
+        if (data.public_url && data.public_url !== CURRENT_PUBLIC_URL) {
+          CURRENT_PUBLIC_URL = data.public_url;
+          const disp = document.getElementById('activeUrlDisplay');
+          if (disp) disp.innerText = data.public_url;
+          const lbl = document.getElementById('accessTypeLabel');
+          if (lbl) lbl.innerText = "Public Link:";
+          ACTIVE_MODAL_URL = data.public_url;
+          renderQr(ACTIVE_MODAL_URL);
+        } else if (!CURRENT_PUBLIC_URL && data.mobile_url) {
+          const disp = document.getElementById('activeUrlDisplay');
+          if (disp && disp.innerText.includes('Connecting')) {
+            disp.innerText = data.mobile_url;
+          }
+        }
+      } catch (e) {
+        // Ignore background polling error
+      }
+    }
+
+    // Set default date to today & init polling
+    window.addEventListener('DOMContentLoaded', () => {
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      document.getElementById('inputDate').value = `${yyyy}-${mm}-${dd}`;
+      updateFormattedDate();
+
+      renderQr(ACTIVE_MODAL_URL);
+
+      // Poll for tunnel discovery every 2s for first 20 seconds
+      checkTunnelInfo();
+      const interval = setInterval(checkTunnelInfo, 2500);
+      setTimeout(() => clearInterval(interval), 30000);
+    });
+
+    function triggerCamera() {
+      const input = document.getElementById('fileInput');
+      input.setAttribute('capture', 'environment');
+      input.click();
+    }
+
+    function switchTab(tab) {
+      if (tab === 'upload') {
+        document.getElementById('tabUpload').style.display = 'block';
+        document.getElementById('tabHistory').style.display = 'none';
+        document.getElementById('tabUploadBtn').classList.add('active');
+        document.getElementById('tabHistoryBtn').classList.remove('active');
+      } else {
+        document.getElementById('tabUpload').style.display = 'none';
+        document.getElementById('tabHistory').style.display = 'block';
+        document.getElementById('tabUploadBtn').classList.remove('active');
+        document.getElementById('tabHistoryBtn').classList.add('active');
+        loadPortalExpenses();
+      }
+    }
+
+    function showQrModal() {
+      const modal = new bootstrap.Modal(document.getElementById('qrModal'));
+      modal.show();
+    }
+
+    function updateFormattedDate() {
+      const d = document.getElementById('inputDate').value;
+      if (!d) return;
+      const parts = d.split('-');
+      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const portalDate = `${parts[2]}-${months[parseInt(parts[1])-1]}-${parts[0]}`;
+      document.getElementById('inputPortalDate').value = portalDate;
+    }
+
+    function updateCharCount() {
+      const txt = document.getElementById('inputRemarks').value;
+      document.getElementById('charCount').innerText = txt.length;
+    }
+
+    function applyPreset(preset, el) {
+      document.querySelectorAll('.preset-chip').forEach(c => c.classList.remove('active'));
+      if (el) el.classList.add('active');
+
+      const expSelect = document.getElementById('selectExpType');
+      const remarks = document.getElementById('inputRemarks');
+
+      if (preset === 'rapido') {
+        setSelectByText(expSelect, 'Other');
+        if (!remarks.value) remarks.value = "Pickup to Drop (Rapido Ride)";
+      } else if (preset === 'uber') {
+        setSelectByText(expSelect, 'Other');
+        remarks.value = "Vasai West (Bassein Bank) to Lodha Business District Thane West - Returning from Bassein Bank visit booked by Rohan with me (Uber)";
+      } else if (preset === 'lunch') {
+        setSelectByText(expSelect, 'Lunch');
+        if (!remarks.value) remarks.value = "Lunch during client visit";
+      } else if (preset === 'dinner') {
+        setSelectByText(expSelect, 'Dinner');
+        if (!remarks.value) remarks.value = "Dinner with team during project work";
+      } else if (preset === 'hotel') {
+        setSelectByText(expSelect, 'Hotel');
+        if (!remarks.value) remarks.value = "Hotel stay during bank branch audit";
+      } else {
+        setSelectByText(expSelect, 'Other');
+      }
+      updateCharCount();
+    }
+
+    function setSelectByText(selectEl, text) {
+      for (let i = 0; i < selectEl.options.length; i++) {
+        if (selectEl.options[i].text.toLowerCase() === text.toLowerCase()) {
+          selectEl.selectedIndex = i;
+          break;
+        }
+      }
+    }
+
+    // File selection & Auto Parse
+    async function handleFileSelect(input) {
+      if (!input.files || input.files.length === 0) return;
+      const file = input.files[0];
+
+      // Show upload progress
+      const uploadBox = document.getElementById('uploadBox');
+      uploadBox.innerHTML = `
+        <div class="spinner-border text-primary my-2" role="status"></div>
+        <h6 class="fw-bold mb-0">Analyzing Receipt...</h6>
+        <small class="text-muted">Converting & extracting details</small>
+      `;
+
+      const formData = new FormData();
+      formData.append('receipt', file);
+
+      try {
+        const res = await fetch('/api/upload-parse', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          document.getElementById('uploadedFilename').value = data.filename;
+          document.getElementById('previewImg').src = data.preview_url;
+          document.getElementById('previewFileName').innerText = data.filename;
+          document.getElementById('previewContainer').style.display = 'block';
+
+          // Auto-fill parsed details
+          if (data.parsed.amount) {
+            document.getElementById('inputAmount').value = data.parsed.amount;
+          }
+          if (data.parsed.date) {
+            document.getElementById('inputPortalDate').value = data.parsed.date;
+            // Set date picker
+            const dtParts = data.parsed.date.split('-');
+            if (dtParts.length === 3) {
+              const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+              const mIdx = months.indexOf(dtParts[1]) + 1;
+              if (mIdx > 0) {
+                document.getElementById('inputDate').value = `${dtParts[2]}-${String(mIdx).padStart(2, '0')}-${dtParts[0]}`;
+              }
+            }
+          }
+          if (data.parsed.remarks) {
+            document.getElementById('inputRemarks').value = data.parsed.remarks;
+            updateCharCount();
+          }
+          if (data.parsed.exp_type_id) {
+            document.getElementById('selectExpType').value = data.parsed.exp_type_id;
+          }
+
+          // Reset upload box UI
+          uploadBox.innerHTML = `
+            <i class="fa-solid fa-circle-check fa-2x text-success mb-2"></i>
+            <h6 class="fw-bold mb-0 text-success">Receipt Ready & Analyzed</h6>
+            <small class="text-muted">Tap to choose a different receipt</small>
+          `;
+        } else {
+          alert("Error: " + data.error);
+          resetUploadBox();
+        }
+      } catch (err) {
+        alert("Upload failed: " + err.message);
+        resetUploadBox();
+      }
+    }
+
+    function clearUploadedFile(e) {
+      if (e) e.stopPropagation();
+      document.getElementById('uploadedFilename').value = '';
+      document.getElementById('previewContainer').style.display = 'none';
+      document.getElementById('fileInput').value = '';
+      resetUploadBox();
+    }
+
+    function resetUploadBox() {
+      const uploadBox = document.getElementById('uploadBox');
+      uploadBox.innerHTML = `
+        <i class="fa-solid fa-camera fa-2x text-primary mb-2"></i>
+        <h6 class="fw-bold mb-1">Take Photo or Choose File</h6>
+        <small class="text-muted">Supports JPG, PNG, or PDF</small>
+      `;
+    }
+
+    // Submit to EMS Portal
+    async function submitToPortal() {
+      const filename = document.getElementById('uploadedFilename').value;
+      const portalDate = document.getElementById('inputPortalDate').value;
+      const amount = document.getElementById('inputAmount').value;
+      const expTypeId = document.getElementById('selectExpType').value;
+      const companyId = document.getElementById('selectCompany').value;
+      const remarks = document.getElementById('inputRemarks').value;
+
+      if (!filename) {
+        alert("Please upload a receipt photo or PDF first!");
+        return;
+      }
+      if (!amount || parseFloat(amount) <= 0) {
+        alert("Please enter a valid amount!");
+        return;
+      }
+      if (!portalDate) {
+        alert("Please select a date!");
+        return;
+      }
+
+      // Show Progress Modal
+      const progressModalEl = document.getElementById('progressModal');
+      const progressModal = new bootstrap.Modal(progressModalEl);
+      const titleEl = document.getElementById('progressTitle');
+      const descEl = document.getElementById('progressDesc');
+      
+      titleEl.innerText = "Submitting to EMS Portal...";
+      descEl.innerText = "Authenticating with portal and uploading receipt...";
+      progressModal.show();
+
+      try {
+        const payload = {
+          filename: filename,
+          date: portalDate,
+          amount: amount,
+          company_id: companyId,
+          exp_type_id: expTypeId,
+          remarks: remarks
+        };
+
+        const res = await fetch('/api/submit-portal', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const result = await res.json();
+
+        progressModal.hide();
+
+        if (result.success) {
+          alert(`🎉 SUCCESS!\n\nYour expense of ₹${amount} on ${portalDate} was successfully submitted to the EMS portal!\n\nStatus: In Process`);
+          clearUploadedFile();
+          document.getElementById('inputAmount').value = '';
+          document.getElementById('inputRemarks').value = '';
+          updateCharCount();
+          switchTab('history');
+        } else {
+          alert("Submission Error:\n" + result.error);
+        }
+      } catch (err) {
+        progressModal.hide();
+        alert("Network Error: " + err.message);
+      }
+    }
+
+    // Load History
+    async function loadPortalExpenses() {
+      const listEl = document.getElementById('historyList');
+      const loadingEl = document.getElementById('historyLoading');
+      listEl.innerHTML = '';
+      loadingEl.style.display = 'block';
+
+      try {
+        const res = await fetch('/api/portal-expenses');
+        const data = await res.json();
+        loadingEl.style.display = 'none';
+
+        if (data.success && data.expenses.length > 0) {
+          let html = '';
+          data.expenses.forEach((item, idx) => {
+            const isProcess = item.status.toLowerCase().includes('process');
+            const badgeClass = isProcess ? 'badge-in-process' : 'badge-paid';
+
+            html += `
+              <div class="p-3 mb-2 border rounded-3 bg-light">
+                <div class="d-flex justify-content-between align-items-start">
+                  <div>
+                    <span class="badge bg-secondary mb-1">${item.date}</span>
+                    <span class="badge bg-primary mb-1">${item.type}</span>
+                    <h6 class="fw-bold mb-1 text-dark">₹${item.amount}</h6>
+                  </div>
+                  <span class="badge ${badgeClass} px-2 py-1">${item.status}</span>
+                </div>
+                <small class="text-muted d-block mt-1">${item.note}</small>
+              </div>
+            `;
+          });
+          listEl.innerHTML = html;
+        } else {
+          listEl.innerHTML = '<p class="text-center text-muted py-3">No expenses found on portal.</p>';
+        }
+      } catch (err) {
+        loadingEl.style.display = 'none';
+        listEl.innerHTML = `<p class="text-danger small">Failed to load history: ${err.message}</p>`;
+      }
+    }
+  </script>
+</body>
+</html>
